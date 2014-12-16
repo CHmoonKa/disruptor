@@ -56,6 +56,7 @@ import com.lmax.disruptor.util.Util;
  *
  * @param <T> the type of event used.
  */
+@SuppressWarnings("unchecked")
 public class Disruptor<T>
 {
     private final RingBuffer<T> ringBuffer;
@@ -119,7 +120,6 @@ public class Disruptor<T>
      * @param handlers the event handlers that will process events.
      * @return a {@link EventHandlerGroup} that can be used to chain dependencies.
      */
-    @SuppressWarnings("varargs")
     public EventHandlerGroup<T> handleEventsWith(final EventHandler<? super T>... handlers)
     {
         return createEventProcessors(new Sequence[0], handlers);
@@ -176,7 +176,6 @@ public class Disruptor<T>
      * @param workHandlers the work handlers that will process events.
      * @return a {@link EventHandlerGroup} that can be used to chain dependencies.
      */
-    @SuppressWarnings("varargs")
     public EventHandlerGroup<T> handleEventsWithWorkerPool(final WorkHandler<T>... workHandlers)
     {
         return createWorkerPool(new Sequence[0], workHandlers);
@@ -216,7 +215,6 @@ public class Disruptor<T>
      *                 that will form the barrier for subsequent handlers or processors.
      * @return an {@link EventHandlerGroup} that can be used to setup a dependency barrier over the specified event handlers.
      */
-    @SuppressWarnings("varargs")
     public EventHandlerGroup<T> after(final EventHandler<T>... handlers)
     {
         final Sequence[] sequences = new Sequence[handlers.length];

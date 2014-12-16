@@ -25,7 +25,6 @@ public class EvilEqualsEventHandler implements EventHandler<TestEvent>
     {
     }
 
-    @SuppressWarnings({"EqualsWhichDoesntCheckParameterClass"})
     public boolean equals(Object o)
     {
         return true;

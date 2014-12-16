@@ -28,6 +28,7 @@ import java.util.Arrays;
  *
  * @param <T> the type of entry used by the event processors.
  */
+@SuppressWarnings("unchecked")
 public class EventHandlerGroup<T>
 {
     private final Disruptor<T> disruptor;
