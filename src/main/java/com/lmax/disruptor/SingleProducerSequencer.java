@@ -111,9 +111,23 @@ public final class SingleProducerSequencer extends SingleProducerSequencerFields
         long nextValue = this.nextValue;
 
         long nextSequence = nextValue + n;
+        
+        //可以预先放满整个bufferSize
         long wrapPoint = nextSequence - bufferSize;
         long cachedGatingSequence = this.cachedValue;
 
+        /**
+         * wrapPoint表示先装满bufferSize,然后第二轮的开始位置.
+         * wrapPoint > cachedGatingSequence表示还有bufferSize的event没有被消耗
+         * 这时需要等待.
+         * 说明eventProcessor的处理速度跟不上，minSequence为 eventProcessor中sequence最小的
+         */
+        /**
+         * If reset the the sequences back to an old value. cachedGatingSequence > nextValue will true.
+         * Try removing the code and running the unit tests, you will see that one of the them fails.
+         * I hope to remove this in the future.
+         * https://github.com/LMAX-Exchange/disruptor/issues/76
+         */
         if (wrapPoint > cachedGatingSequence || cachedGatingSequence > nextValue)
         {
             long minSequence;

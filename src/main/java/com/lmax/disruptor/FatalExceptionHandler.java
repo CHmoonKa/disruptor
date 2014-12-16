@@ -24,6 +24,12 @@ import java.util.logging.Logger;
  */
 public final class FatalExceptionHandler implements ExceptionHandler
 {
+    /**
+     * 使用JDK内置Logger可以分成三个步骤来完成： 
+     * 1. 创建Logger 
+     * 2. 创建Handler,为handler指定Formmater, 然后将Handler添加到logger中去。 
+     * 3. 设定Level级别 
+     */
     private static final Logger LOGGER = Logger.getLogger(FatalExceptionHandler.class.getName());
     private final Logger logger;
 

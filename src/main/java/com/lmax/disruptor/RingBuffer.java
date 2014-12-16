@@ -21,6 +21,10 @@ import sun.misc.Unsafe;
 import com.lmax.disruptor.dsl.ProducerType;
 import com.lmax.disruptor.util.Util;
 
+/**
+ * 1. 前面7个padding是为了防止与前面的核心变量放在同一个缓存行，
+ * 2. 同理后面7个防止与后面的核心变量放在同一个缓存行
+ */
 abstract class RingBufferPad
 {
     protected long p1, p2, p3, p4, p5, p6, p7;
@@ -34,6 +38,12 @@ abstract class RingBufferFields<E> extends RingBufferPad
     private static final Unsafe UNSAFE = Util.getUnsafe();
     static
     {
+        /**
+         * Get size of an element in the array.
+         * 1. It is always 8 bytes for heaps over 32G;
+         * 2. But, for smaller heaps it is 4 bytes 
+         *    unless you will turn off -XX:-UseCompressedOops JVM setting.
+         */
         final int scale = UNSAFE.arrayIndexScale(Object[].class);
         if (4 == scale)
         {
@@ -47,8 +57,18 @@ abstract class RingBufferFields<E> extends RingBufferPad
         {
             throw new IllegalStateException("Unknown pointer size");
         }
+        /**
+         * BUFFER_PAD == 32 or 16
+         */
         BUFFER_PAD = 128 / scale;
-        // Including the buffer pad in the array base offset
+        
+        /**
+         * get offset of a first element in the array
+         * UNSAFE.arrayBaseOffset(Object[].class)
+         * 
+         * Including the buffer pad in the array base offset.
+         * (BUFFER_PAD << REF_ELEMENT_SHIFT) == 128 bytes
+         */
         REF_ARRAY_BASE = UNSAFE.arrayBaseOffset(Object[].class) + (BUFFER_PAD << REF_ELEMENT_SHIFT);
     }
 
@@ -73,6 +93,11 @@ abstract class RingBufferFields<E> extends RingBufferPad
         }
 
         this.indexMask = bufferSize - 1;
+        
+        /**
+         * 前后各填充 BUFFER_PAD 个数据.
+         * BUFFER_PAD个数据,刚好等于128 bytes.
+         */
         this.entries   = new Object[sequencer.getBufferSize() + 2 * BUFFER_PAD];
         fill(eventFactory);
     }
@@ -85,6 +110,11 @@ abstract class RingBufferFields<E> extends RingBufferPad
         }
     }
 
+    /**
+     * 1. ((sequence & indexMask) << REF_ELEMENT_SHIFT)
+     *    这个正好是 (第几个)*(每一个占的byte数) = 正确的数据位置.
+     *    3(index)*4(size of an element) == 3<<2.
+     */
     @SuppressWarnings("unchecked")
     protected final E elementAt(long sequence)
     {
