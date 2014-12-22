@@ -14,7 +14,6 @@ import com.lmax.disruptor.util.DaemonThreadFactory;
 
 public class WorkerPoolTest
 {
-    @SuppressWarnings("unchecked")
     @Test
     public void shouldProcessEachMessageByOnlyOneWorker() throws Exception
     {
@@ -35,7 +34,6 @@ public class WorkerPoolTest
         assertThat(ringBuffer.get(1).get(), is(1L));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void shouldProcessOnlyOnceItHasBeenPublished() throws Exception
     {
